@@ -1,0 +1,11 @@
+@startjson
+{
+    "to": [
+        "userId1",
+        "userId2",
+        "etc"
+    ],
+    "subject": "Subject of the PUSH notification",
+    "body": "A further description of the PUSH notification."
+}
+@endjson

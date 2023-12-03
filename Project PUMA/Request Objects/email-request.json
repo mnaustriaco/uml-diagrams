@@ -1,0 +1,17 @@
+@startjson
+    {
+    "to": [
+        "email1",
+        "email2"
+    ],
+    "cc": [
+        "ccemail1",
+        "ccemail2"
+    ],
+    "bcc": [
+        "email1"
+    ],
+    "subject": "This is the subject of EMAIL",
+    "body": "The content of email."
+}
+@endjson

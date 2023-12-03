@@ -5,7 +5,7 @@ boundary "Applications" as xapps
 participant "PUMA REST Client \n(Tentative)" as pmrc
 participant "PUMA REST API" as pmra
 'participant "PUMA Core Service" as pmc
-queue "PUMA RabbitMQ" as pmrmq
+queue "PUMA Queue" as pmrmq
 participant "PUMA \nWebSocket" as pmnp
 participant "PUMA Mailer" as pmml
 participant "PUMA Cassandra \n Database" as pmdb
@@ -16,7 +16,7 @@ pmrc --> pmra: then rest-client will\n send request to rest-api.
 pmra --> pmdb: write to DB \n notification request.
 pmdb --> pmra: data written. \nsend back notificationId
 pmra --> pmrmq: Send request to queue
-pmra -> xapps: use notificationId to \nquery notification status
+pmra -> xapps: once signal was sent to queue, return\n notificationId
 pmrmq --> pmml: notify mailer to send mail.
 pmml -> recipients: Receive e-mail
 pmrmq --> pmnp: notify to send push notification.
