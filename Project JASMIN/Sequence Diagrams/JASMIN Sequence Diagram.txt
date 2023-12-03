@@ -1,0 +1,34 @@
+@startuml
+!theme crt-green
+participant "External APIs called\n by your API" as XApiB
+participant "External APIs \ncalling your API" as XApiA 
+participant "Your API" as JApi
+participant "JASMIN Interceptor" as Jncpt
+participant "JASMIN Server" as JSvr
+
+group Initialization
+    JApi -> JSvr: register API and its scopes
+    JSvr --> JSvr: store API info to database
+    JSvr -> JApi: give apiKey to inject in Env Vars
+    JApi --> Jncpt: Inject Interceptors with given apiKey
+    Jncpt -> JSvr: retrieve API token with apiKey
+    JSvr -> Jncpt: return API token
+    Jncpt --> Jncpt: store API token
+end
+
+XApiA-> JApi: External APIs sent a request
+JApi --> Jncpt: incoming request with a valid token
+Jncpt --> Jncpt: validate incoming request's token
+Jncpt --> JApi: token validation succeeds, proceed with request.
+group Your API calling external endpoints (registered through JASMIN) thru RestTemplate
+JApi --> Jncpt: outgoing request to Provider (or upstream)\nAPIs to complete request
+Jncpt --> Jncpt: for every outgoing requests, inject token
+Jncpt -> XApiB: proceed outgoing request with injected token
+XApiB --> XApiB: internal flow with Jasmin Interceptor
+XApiB -> JApi: return valid response
+end
+JApi --> JApi: build response
+JApi -> XApiA: return built response
+
+
+@enduml
