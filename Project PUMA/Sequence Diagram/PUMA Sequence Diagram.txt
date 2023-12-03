@@ -1,2 +1,43 @@
 @startuml
+!theme crt-green
+actor "Recipients" as recipients
+boundary "Applications" as xapps
+participant "PUMA REST Client \n(Tentative)" as pmrc
+participant "PUMA REST API" as pmra
+'participant "PUMA Core Service" as pmc
+queue "PUMA RabbitMQ" as pmrmq
+participant "PUMA \nWebSocket" as pmnp
+participant "PUMA Mailer" as pmml
+participant "PUMA Cassandra \n Database" as pmdb
+
+xapps -> pmra: Clients can hit the REST APIs directly
+xapps --> pmrc: or implement the rest-client.
+pmrc --> pmra: then rest-client will\n send request to rest-api.
+pmra --> pmdb: write to DB \n notification request.
+pmdb --> pmra: data written. \nsend back notificationId
+pmra --> pmrmq: Send request to queue
+pmra -> xapps: use notificationId to \nquery notification status
+pmrmq --> pmml: notify mailer to send mail.
+pmml -> recipients: Receive e-mail
+pmrmq --> pmnp: notify to send push notification.
+pmnp --> recipients: will receive notifications on active browser session.
+pmml --> pmrmq: send back response to queue
+pmnp --> pmrmq: 
+pmrmq --> pmra: receive process status from queue.
+pmra --> pmdb: write status to Database
+
+xapps -> pmra: query status of requests
+    note over pmra, pmrmq
+     in-memory database might sit between REST and Core-Svc to avoid multiple
+     query to Cassandra. as Cassandra is designed better for write operations.
+    end note
+pmra --> pmdb: retrieve notification status
+pmdb --> pmra:
+pmra -> xapps: return status
+
+group PULL notifications are actions initiated by user.
+recipients -> pmra: PULL previous notifications
+pmra --> pmdb: query database
+pmra -> recipients: receive notification history
+
 @enduml
